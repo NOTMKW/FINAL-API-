@@ -5,7 +5,8 @@ import (
 
 	handlers "github.com/NOTMKW/API/internal/handler"
 	models "github.com/NOTMKW/API/internal/model"
-	MakeUser "github.com/NOTMKW/API/internal/repository"
+	repository "github.com/NOTMKW/API/internal/repo"
+	"github.com/NOTMKW/API/internal/routes"
 	user_service "github.com/NOTMKW/API/internal/service"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -36,20 +37,11 @@ func main() {
 
 	db.AutoMigrate(&models.User{})
 
-	user_service := user_service.NewUserService(db)
+	userRepo := repository.NewUserRepository(db)
+	userService := user_service.NewUserService(userRepo)
+	UserHandler := handlers.NewUserHandler(userService)
 
-	UserHandler := handlers.NewUserHandler(user_service)
+	routes.SetupRoutes(app, UserHandler)
 
-	api := app.Group("/api/v1")
-	users := api.Group("/users")
-	users.Post("/", MakeUser.CreateUser(db))
-	users.Get("/:id", UserHandler.GetUser)
-
-	app.Get("/health", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{
-			"status":  "ok",
-			"message": "server is running",
-		})
-	})
 	log.Fatal(app.Listen(":8080"))
 }
