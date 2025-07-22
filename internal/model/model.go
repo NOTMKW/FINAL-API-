@@ -10,6 +10,9 @@ type User struct {
 	UserCode  string `gorm:"uniqueIndex:idx_tenant_user"`
 }
 
-func (User) TableName() string {
-	return "users"
+type CreateUserRequest struct {
+	Firstname string `json:"Firstname" validate:"required"`
+	Lastname  string `json:"Lastname" validate:"required"`
+	Email     string `json:"Email" validate:"required,email"`
+	Password  string `json:"Password" validate:"required,min=6"`
 }
