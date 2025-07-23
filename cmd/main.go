@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/NOTMKW/API/internal/config"
 	handlers "github.com/NOTMKW/API/internal/handler"
 	models "github.com/NOTMKW/API/internal/model"
 	repository "github.com/NOTMKW/API/internal/repo"
@@ -11,8 +12,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 func main() {
@@ -29,10 +28,11 @@ func main() {
 	})
 	app.Use(cors.New())
 
-	dsn := "host=localhost user=postgres password=imrankw dbname=clone port=5432 sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal("failed to connect to database", err)
+	config.ConnectDatabase()
+	db := config.DB
+
+	if db == nil {
+		log.Fatal("database connection is nil")
 	}
 
 	db.AutoMigrate(&models.User{})
